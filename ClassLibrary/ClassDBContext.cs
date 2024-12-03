@@ -76,15 +76,21 @@ namespace ClassLibrary
                 .HasForeignKey(e => e.AdminId)
                 .OnDelete(DeleteBehavior.Restrict); // Avoid cascading delete
 
+
             // MenuItem relationships
             modelBuilder.Entity<MenuItems>()
                 .HasKey(m => m.Id);
 
             modelBuilder.Entity<MenuItems>()
                 .HasOne(m => m.Admin)
+                 .WithMany(a => a.MenuItems)
+                 .HasForeignKey(m => m.AdminId);
+
+            modelBuilder.Entity<MenuItems>()
+                .HasOne(m => m.Agency)
                 .WithMany(a => a.MenuItems)
-                .HasForeignKey(m => m.AdminId)
-                .OnDelete(DeleteBehavior.Restrict); // Avoid cascading delete
+                .HasForeignKey(m => m.AgencyId);
+            // Avoid cascading delete // Avoid cascading delete
 
             // NewsItem relationships
             modelBuilder.Entity<NewsItem>()
@@ -156,6 +162,32 @@ namespace ClassLibrary
             modelBuilder.Entity<Screen>().HasData(
                 new Screen { Id = 1, Name = "DM001", AgencyId = 1, MACAddress = "00:1A:2B:3C:4D:5E", LocationId = 1, DepartmentId = 1, DateCreated = DateTime.UtcNow, ScreenType = "LED", LastUpdated = DateTime.UtcNow, LastCheckedIn = DateTime.UtcNow, IsOnline = true, StatusMessage = "Active" },
                 new Screen { Id = 2, Name = "LH002", AgencyId = 2, MACAddress = "11:22:33:44:55:66", LocationId = 2, DepartmentId = 2, DateCreated = DateTime.UtcNow, ScreenType = "LCD", LastUpdated = DateTime.UtcNow, LastCheckedIn = DateTime.UtcNow, IsOnline = true, StatusMessage = "Active" }
+            );
+
+            // Seed MenuItems data, ensuring valid AgencyId is provided
+            modelBuilder.Entity<MenuItems>().HasData(
+                new MenuItems
+                {
+                    Id = 1,
+                    Title = "Holiday Announcement",
+                    Description = "Upcoming holiday schedule for the office.",
+                    StartDate = new DateTime(2024, 12, 04, 08, 00, 00),
+                    EndDate = new DateTime(2024, 12, 20, 17, 00, 00),
+                    IsExpired = false,
+                    AdminId = 1,
+                    AgencyId = 1 // Reference to the AgencyId (make sure the Id exists)
+                },
+                new MenuItems
+                {
+                    Id = 2,
+                    Title = "Staff Meeting",
+                    Description = "Reminder for the upcoming staff meeting.",
+                    StartDate = new DateTime(2024, 12, 05, 09, 00, 00),
+                    EndDate = new DateTime(2024, 12, 05, 10, 00, 00),
+                    IsExpired = false,
+                    AdminId = 2,
+                    AgencyId = 2 // Another valid AgencyId
+                }
             );
 
             modelBuilder.Entity<Admin>().HasData(

@@ -27,8 +27,9 @@ namespace ClassLibrary.Models
         public string Name { get; set; }
 
         public string Description { get; set; }
-
+        
         public ICollection<Department> Departments { get; set; }
+        public ICollection<MenuItems> MenuItems { get; set; }
         public ICollection<Screen> Screen { get; set; }
         public ICollection<Location> Locations { get; set; }
         public ICollection<Admin> Admins { get; set; }

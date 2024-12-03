@@ -36,7 +36,7 @@ namespace TheWebApplication.Controllers
             }
             catch
             {
-                // If logging to the database fails, fallback to console/logging service
+                // Fallback to console logging if database logging fails
                 Console.WriteLine($"Failed to log error: {message}");
             }
         }
@@ -125,9 +125,11 @@ namespace TheWebApplication.Controllers
         {
             try
             {
-                // Assuming you have access to the logged-in AdminId
-                // Replace this with actual logic for fetching the AdminId (e.g., from User Claims or Authentication Context)
-                // Assuming the AdminId is a string from user claims
+                // Ensure that AdminId is passed in the request body
+                if (createNewsItemDto.AdminId <= 0)
+                {
+                    return BadRequest("Invalid Admin ID.");
+                }
 
                 // Create a new NewsItem object from the DTO
                 var newsItem = new NewsItem
@@ -136,18 +138,8 @@ namespace TheWebApplication.Controllers
                     NewsItemBody = createNewsItemDto.NewsItemBody,
                     TimeOutDate = createNewsItemDto.TimeOutDate,
                     MoreInformationUrl = createNewsItemDto.MoreInformationUrl,
+                    AdminId = createNewsItemDto.AdminId  // Use AdminId from the request body
                 };
-                var adminIdString = User.FindFirst("adminId")?.Value;
-
-                // Try to convert the string to an int
-                if (int.TryParse(adminIdString, out int adminId))
-                {
-                    newsItem.AdminId = adminId;  // Now AdminId is assigned as an int
-                }
-                else
-                {
-                    return Unauthorized("Admin ID is invalid or not found.");
-                }
 
                 // Convert string Importance to the enum using Enum.TryParse
                 if (Enum.TryParse(createNewsItemDto.Importance.ToString(), out NewsItem.ImportanceLevel importanceLevel))
@@ -184,7 +176,7 @@ namespace TheWebApplication.Controllers
                 _context.NewsItems.Add(newsItem);
                 await _context.SaveChangesAsync();
 
-                // Return the created NewsItem DTO (you can return a more detailed DTO if needed)
+                // Return the created NewsItem DTO
                 return Ok(new NewsItemDto
                 {
                     Id = newsItem.Id,
@@ -193,7 +185,7 @@ namespace TheWebApplication.Controllers
                     TimeOutDate = newsItem.TimeOutDate,
                     DateCreated = newsItem.DateCreated,
                     LastUpdated = newsItem.LastUpdated,
-                    Importance = (NewsItemDto.ImportanceLevelDto)newsItem.Importance, // Map to DTO
+                    Importance = (NewsItemDto.ImportanceLevelDto)newsItem.Importance,
                     MoreInformationUrl = newsItem.MoreInformationUrl,
                     AgencyId = newsItem.NewsItemAgencies.Select(na => na.AgencyId).ToList(),
                     DepartmentId = newsItem.NewsItemDepartments.Select(nd => nd.DepartmentId).ToList(),
@@ -203,7 +195,8 @@ namespace TheWebApplication.Controllers
             }
             catch (Exception ex)
             {
-                await LogErrorAsync(ex.Message);
+                // Log the detailed exception message and stack trace for better debugging
+                await LogErrorAsync($"Error creating news item: {ex.Message}\n{ex.StackTrace}");
                 return StatusCode(500, "An error occurred while creating the news item.");
             }
         }
@@ -278,7 +271,6 @@ namespace TheWebApplication.Controllers
             try
             {
                 var newsItem = await _context.NewsItems.FindAsync(id);
-
                 if (newsItem == null)
                 {
                     return NotFound($"News item with ID {id} not found.");
