@@ -54,6 +54,10 @@ namespace TheWebApplication.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ScreenDto>> GetScreen(int id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             try
             {
                 var screen = await _context.Screens.FindAsync(id);
@@ -84,22 +88,30 @@ namespace TheWebApplication.Controllers
         public async Task<ActionResult<ScreenDto>> CreateScreen([FromBody] CreateScreenDto createScreenDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                               .Select(e => e.ErrorMessage)
+                                               .ToList();
+                return BadRequest(errors);
+            }
 
             try
             {
                 var screen = new Screen
                 {
                     Name = createScreenDto.Name,
-                    DepartmentId = createScreenDto.DepartmentId,
                     LocationId = createScreenDto.LocationId,
+                    DepartmentId = createScreenDto.DepartmentId,
+                    AgencyId = createScreenDto.AgencyId,
                     ScreenType = createScreenDto.ScreenType,
                     IsOnline = createScreenDto.IsOnline,
-                    StatusMessage = createScreenDto.StatusMessage
+                    StatusMessage = createScreenDto.StatusMessage,
+                    MACAddress = createScreenDto.MACAddress
                 };
 
+                // Add screen to the context and try saving to the database
                 _context.Screens.Add(screen);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(); // This is where the error may occur
 
                 var screenDto = new ScreenDto
                 {
@@ -112,9 +124,17 @@ namespace TheWebApplication.Controllers
 
                 return CreatedAtAction(nameof(GetScreen), new { id = screen.Id }, screenDto);
             }
+            catch (DbUpdateException dbEx)
+            {
+                // Log the specific database update error
+                _logger.LogError("Database update error: {Message}, InnerException: {InnerException}, StackTrace: {StackTrace}",
+                    dbEx.Message, dbEx.InnerException?.Message, dbEx.StackTrace);
+                return StatusCode(500, "Database update failed.");
+            }
             catch (Exception ex)
             {
-                await LogErrorToDatabaseAsync("Error in CreateScreen", ex);
+                // Log general errors
+                _logger.LogError("An unexpected error occurred: {0}", ex.Message);
                 return StatusCode(500, "Internal server error.");
             }
         }

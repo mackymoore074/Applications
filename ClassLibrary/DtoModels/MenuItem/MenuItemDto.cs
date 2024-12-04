@@ -14,6 +14,8 @@ namespace ClassLibrary.DtoModels.MenuItem
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public bool IsExpired { get; set; }
-        public int ScreenId { get; set; }
+        public int AgencyId { get; set; }
+        public int AdminId { get; set; }
+
     }
 }
