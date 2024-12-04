@@ -10,6 +10,14 @@ namespace ClassLibrary.Models
 {
     public class Department
     {
+        public Department()
+        {
+            Screens = new List<Screen>();
+            Employees = new List<Employee>();
+            NewsItemDepartments = new List<NewsItemDepartment>();
+            AdminDepartmentLocations = new List<AdminDepartmentLocation>();
+        }
+
         public int Id { get; set; }
 
         [Required]
@@ -20,19 +28,13 @@ namespace ClassLibrary.Models
         public DateTime DateCreated { get; set; }
         public int AgencyId { get; set; } // The agency this department belongs to  
         public Agency Agency { get; set; } // The agency this department belongs to
-        public List<Admin> Admins { get; set; } = new List<Admin>(); // Admins linked to this department
+        public int LocationId { get; set; } // Foreign key to Location
+        public Location Locations { get; set; } // Navigation property for Location
         public List<Screen> Screens { get; set; } = new List<Screen>(); // Screens in the department
         public List<Employee> Employees { get; set; } = new List<Employee>(); // Employees in the department
         // Many-to-many relationship with NewsItems
         public ICollection<NewsItemDepartment> NewsItemDepartments { get; set; }
-
-        public Department()
-        {
-            NewsItemDepartments = new List<NewsItemDepartment>();
-        }
-        public int LocationId { get; set; } // Foreign key to Location
-        public Location Locations { get; set; } // Navigation property for Location
-
+        public ICollection<AdminDepartmentLocation> AdminDepartmentLocations { get; set; }
 
     }
 

@@ -35,9 +35,10 @@ namespace TheWebApplication.Controllers
             {
                 var admins = await _context.Admins
                     .Include(a => a.Agency)
-                    .Include(a => a.Department)
-                    .Include(a => a.Location)
-                    .Include(a => a.Screen)
+                    .Include(a => a.AdminDepartmentLocations)
+                        .ThenInclude(adl => adl.Department)
+                    .Include(a => a.AdminDepartmentLocations)
+                        .ThenInclude(adl => adl.Location)
                     .Select(a => new AdminDto
                     {
                         Id = a.Id,
@@ -45,10 +46,13 @@ namespace TheWebApplication.Controllers
                         LastName = a.LastName,
                         Email = a.Email,
                         Role = a.Role.ToString(),
-                        AgencyName = a.Agency.Name,
-                        DepartmentName = a.Department.Name,
-                        LocationName = a.Location.Name,
-                        ScreenName = a.Screen.Name,
+                        AgencyName = a.Agency != null ? a.Agency.Name : null,
+                        DepartmentName = a.AdminDepartmentLocations.Any() 
+                            ? a.AdminDepartmentLocations.First().Department.Name 
+                            : null,
+                        LocationName = a.AdminDepartmentLocations.Any() 
+                            ? a.AdminDepartmentLocations.First().Location.Name 
+                            : null,
                         DateCreated = a.DateCreated,
                         LastLogin = a.LastLogin
                     })
@@ -71,9 +75,10 @@ namespace TheWebApplication.Controllers
             {
                 var admin = await _context.Admins
                     .Include(a => a.Agency)
-                    .Include(a => a.Department)
-                    .Include(a => a.Location)
-                    .Include(a => a.Screen)
+                    .Include(a => a.AdminDepartmentLocations)
+                        .ThenInclude(adl => adl.Department)
+                    .Include(a => a.AdminDepartmentLocations)
+                        .ThenInclude(adl => adl.Location)
                     .Where(a => a.Id == id)
                     .Select(a => new AdminDto
                     {
@@ -82,6 +87,13 @@ namespace TheWebApplication.Controllers
                         LastName = a.LastName,
                         Email = a.Email,
                         Role = a.Role.ToString(),
+                        AgencyName = a.Agency != null ? a.Agency.Name : null,
+                        DepartmentName = a.AdminDepartmentLocations.Any() 
+                            ? a.AdminDepartmentLocations.First().Department.Name 
+                            : null,
+                        LocationName = a.AdminDepartmentLocations.Any() 
+                            ? a.AdminDepartmentLocations.First().Location.Name 
+                            : null,
                         DateCreated = a.DateCreated,
                         LastLogin = a.LastLogin
                     })

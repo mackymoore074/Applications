@@ -5,6 +5,12 @@ using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using ClassLibrary.Models;
 using ClassLibrary;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
+using TheWebApplication.Middleware;
+using TheWebApplication.Security;
 
 var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
 
@@ -31,6 +37,30 @@ builder.Services.AddDbContext<ClassDBContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add JWT Authentication
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+            builder.Configuration["JwtSettings:Key"])),
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        ValidAudience = builder.Configuration["JwtSettings:Audience"]
+    };
+    
+    options.EventsType = typeof(CustomJwtBearerEvents);
+});
+
+builder.Services.AddScoped<CustomJwtBearerEvents>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -42,7 +72,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<CustomAuthorizationMiddleware>();
 
 app.MapControllers();
 

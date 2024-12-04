@@ -20,32 +20,37 @@ namespace ClassLibrary.Models
         [EmailAddress]
         public string Email { get; set; }
 
-        public string PasswordHash { get; set; } // Ensure this field is always provided
+        public string PasswordHash { get; set; }
 
         public Role Role { get; set; }
 
         public int? AgencyId { get; set; }
         public Agency? Agency { get; set; }
 
-        public int? DepartmentId { get; set; }
-        public Department? Department { get; set; }
-
-        public int? LocationId { get; set; }
-        public Location? Location { get; set; }
-
-
-        public int? ScreenId { get; set; }
-        public Screen? Screen { get; set; }
-
-
-
         public DateTime DateCreated { get; set; }
         public DateTime LastLogin { get; set; }
 
         // Navigation properties
+        public ICollection<AdminDepartmentLocation> AdminDepartmentLocations { get; set; }
         public ICollection<MenuItems> MenuItems { get; set; }
         public ICollection<NewsItem> NewsItems { get; set; }
         public ICollection<Employee> Employees { get; set; }
+    }
+
+    // New junction table for Admin-Department-Location relationship
+    public class AdminDepartmentLocation
+    {
+        public int Id { get; set; }
+        public int AdminId { get; set; }
+        public Admin Admin { get; set; }
+        
+        public int DepartmentId { get; set; }
+        public Department Department { get; set; }
+        
+        public int LocationId { get; set; }
+        public Location Location { get; set; }
+        
+        public DateTime AssignedDate { get; set; }
     }
 
     // Enum for Role with explicitly set integer values

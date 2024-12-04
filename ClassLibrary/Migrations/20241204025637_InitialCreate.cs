@@ -138,14 +138,12 @@ namespace ClassLibrary.Migrations
                         name: "FK_Screens_Departments_DepartmentId",
                         column: x => x.DepartmentId,
                         principalTable: "Departments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Screens_Locations_LocationId",
                         column: x => x.LocationId,
                         principalTable: "Locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -160,11 +158,10 @@ namespace ClassLibrary.Migrations
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Role = table.Column<int>(type: "int", nullable: false),
                     AgencyId = table.Column<int>(type: "int", nullable: true),
-                    DepartmentId = table.Column<int>(type: "int", nullable: true),
-                    LocationId = table.Column<int>(type: "int", nullable: true),
-                    ScreenId = table.Column<int>(type: "int", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastLogin = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    LastLogin = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LocationId = table.Column<int>(type: "int", nullable: true),
+                    ScreenId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -176,21 +173,47 @@ namespace ClassLibrary.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Admins_Departments_DepartmentId",
+                        name: "FK_Admins_Locations_LocationId",
+                        column: x => x.LocationId,
+                        principalTable: "Locations",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Admins_Screens_ScreenId",
+                        column: x => x.ScreenId,
+                        principalTable: "Screens",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AdminDepartmentLocation",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AdminId = table.Column<int>(type: "int", nullable: false),
+                    DepartmentId = table.Column<int>(type: "int", nullable: false),
+                    LocationId = table.Column<int>(type: "int", nullable: false),
+                    AssignedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AdminDepartmentLocation", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AdminDepartmentLocation_Admins_AdminId",
+                        column: x => x.AdminId,
+                        principalTable: "Admins",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_AdminDepartmentLocation_Departments_DepartmentId",
                         column: x => x.DepartmentId,
                         principalTable: "Departments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Admins_Locations_LocationId",
+                        name: "FK_AdminDepartmentLocation_Locations_LocationId",
                         column: x => x.LocationId,
                         principalTable: "Locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Admins_Screens_ScreenId",
-                        column: x => x.ScreenId,
-                        principalTable: "Screens",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -215,7 +238,7 @@ namespace ClassLibrary.Migrations
                         column: x => x.AdminId,
                         principalTable: "Admins",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -240,7 +263,7 @@ namespace ClassLibrary.Migrations
                         column: x => x.AdminId,
                         principalTable: "Admins",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_MenuItems_Screens_ScreenId",
                         column: x => x.ScreenId,
@@ -272,7 +295,7 @@ namespace ClassLibrary.Migrations
                         column: x => x.AdminId,
                         principalTable: "Admins",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -405,85 +428,28 @@ namespace ClassLibrary.Migrations
 
             migrationBuilder.InsertData(
                 table: "Admins",
-                columns: new[] { "Id", "AgencyId", "DateCreated", "DepartmentId", "Email", "FirstName", "LastLogin", "LastName", "LocationId", "PasswordHash", "Role", "ScreenId" },
-                values: new object[,]
-                {
-                    { 1, null, new DateTime(2024, 12, 2, 19, 32, 32, 992, DateTimeKind.Utc).AddTicks(8492), null, "johndoe@agency.com", "John", new DateTime(2024, 12, 2, 19, 32, 32, 992, DateTimeKind.Utc).AddTicks(8497), "Doe", null, "$2a$11$F78/2W7PaWVypyknBNeSf.9D4.MiVhtVrGmTd9TiprjRvN27gNaeS", 2, null },
-                    { 2, null, new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8338), null, "janesmith@agency.com", "Jane", new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8342), "Smith", null, "$2a$11$sa.JVOBCWNH9YjTwDkx5DOV5i8JFEL2LMi8nggScGhyxfA.Ttgc2.", 1, null }
-                });
+                columns: new[] { "Id", "AgencyId", "DateCreated", "Email", "FirstName", "LastLogin", "LastName", "LocationId", "PasswordHash", "Role", "ScreenId" },
+                values: new object[] { 1, null, new DateTime(2024, 12, 4, 2, 56, 36, 889, DateTimeKind.Utc).AddTicks(3550), "superadmin@system.com", "Super", new DateTime(2024, 12, 4, 2, 56, 36, 889, DateTimeKind.Utc).AddTicks(3550), "Admin", null, "$2a$11$2xAkDKxqNo8gfhxGZCN3s.4gV26T2t6FWq4n2CLJoE/r.MF6ASxrm", 1, null });
 
-            migrationBuilder.InsertData(
-                table: "Agencies",
-                columns: new[] { "Id", "DateCreated", "Description", "Name" },
-                values: new object[,]
-                {
-                    { 1, new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6122), "Description for Agency1", "Agency1" },
-                    { 2, new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6146), "Description for Agency2", "Agency2" }
-                });
+            migrationBuilder.CreateIndex(
+                name: "IX_AdminDepartmentLocation_AdminId",
+                table: "AdminDepartmentLocation",
+                column: "AdminId");
 
-            migrationBuilder.InsertData(
-                table: "Locations",
-                columns: new[] { "Id", "Address", "AgencyId", "DateCreated", "Name" },
-                values: new object[,]
-                {
-                    { 1, "123 Finance St", null, new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6844), "Foothill (Finance)" },
-                    { 2, "456 HR Ave", null, new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6848), "Main Office (HR)" }
-                });
+            migrationBuilder.CreateIndex(
+                name: "IX_AdminDepartmentLocation_DepartmentId",
+                table: "AdminDepartmentLocation",
+                column: "DepartmentId");
 
-            migrationBuilder.InsertData(
-                table: "Departments",
-                columns: new[] { "Id", "AgencyId", "DateCreated", "Description", "LocationId", "Name" },
-                values: new object[,]
-                {
-                    { 1, 1, new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6737), "Finance Department", 1, "Finance" },
-                    { 2, 2, new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6761), "Human Resources Department", 2, "HR" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "NewsItems",
-                columns: new[] { "Id", "AdminId", "DateCreated", "Importance", "LastUpdated", "MoreInformationUrl", "NewsItemBody", "TimeOutDate", "Title" },
-                values: new object[,]
-                {
-                    { 1, 1, new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8740), 1, new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8754), "http://example.com/maintenance", "System maintenance scheduled. Please be aware of the downtime during this period.", new DateTime(2025, 1, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8740), "Important Update" },
-                    { 2, 2, new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8756), 2, new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8757), "http://example.com/new-policy", "A new company policy is now in effect. Please familiarize yourself with the changes.", new DateTime(2025, 1, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8757), "New Policy" },
-                    { 3, 1, new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8759), 2, new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8760), "http://example.com/holiday-schedule", "The company will be closed for the holidays from December 24th to December 26th. Please plan accordingly.", new DateTime(2025, 1, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8759), "Holiday Schedule" },
-                    { 4, 2, new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8761), 1, new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8762), "http://example.com/system-upgrade", "A system upgrade will take place this weekend. Expect intermittent outages from 10 PM to 2 AM.", new DateTime(2025, 1, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8761), "System Upgrade" },
-                    { 5, 1, new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8763), 2, new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8764), "http://example.com/recognition", "We are proud to recognize the efforts of our employees. A ceremony will be held this Friday.", new DateTime(2025, 1, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8763), "Employee Recognition" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "NewsItemAgencies",
-                columns: new[] { "Id", "AgencyId", "NewsItemId" },
-                values: new object[] { 1, 1, 1 });
-
-            migrationBuilder.InsertData(
-                table: "NewsItemDepartments",
-                columns: new[] { "Id", "DepartmentId", "NewsItemId" },
-                values: new object[] { 1, 1, 1 });
-
-            migrationBuilder.InsertData(
-                table: "Screens",
-                columns: new[] { "Id", "AgencyId", "DateCreated", "DepartmentId", "IsOnline", "LastCheckedIn", "LastUpdated", "LocationId", "MACAddress", "Name", "ScreenType", "StatusMessage" },
-                values: new object[,]
-                {
-                    { 1, 1, new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6875), 1, true, new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6876), new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6876), 1, "00:1A:2B:3C:4D:5E", "DM001", "LED", "Active" },
-                    { 2, 2, new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6884), 2, true, new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6885), new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6885), 2, "11:22:33:44:55:66", "LH002", "LCD", "Active" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "NewsItemScreens",
-                columns: new[] { "Id", "NewsItemId", "ScreenId" },
-                values: new object[] { 1, 1, 1 });
+            migrationBuilder.CreateIndex(
+                name: "IX_AdminDepartmentLocation_LocationId",
+                table: "AdminDepartmentLocation",
+                column: "LocationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Admins_AgencyId",
                 table: "Admins",
                 column: "AgencyId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Admins_DepartmentId",
-                table: "Admins",
-                column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Admins_LocationId",
@@ -598,6 +564,9 @@ namespace ClassLibrary.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AdminDepartmentLocation");
+
             migrationBuilder.DropTable(
                 name: "AllowedIpAddresses");
 

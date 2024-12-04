@@ -36,9 +36,6 @@ namespace ClassLibrary.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("DepartmentId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -73,8 +70,6 @@ namespace ClassLibrary.Migrations
 
                     b.HasIndex("AgencyId");
 
-                    b.HasIndex("DepartmentId");
-
                     b.HasIndex("LocationId");
 
                     b.HasIndex("ScreenId");
@@ -85,25 +80,45 @@ namespace ClassLibrary.Migrations
                         new
                         {
                             Id = 1,
-                            DateCreated = new DateTime(2024, 12, 2, 19, 32, 32, 992, DateTimeKind.Utc).AddTicks(8492),
-                            Email = "johndoe@agency.com",
-                            FirstName = "John",
-                            LastLogin = new DateTime(2024, 12, 2, 19, 32, 32, 992, DateTimeKind.Utc).AddTicks(8497),
-                            LastName = "Doe",
-                            PasswordHash = "$2a$11$F78/2W7PaWVypyknBNeSf.9D4.MiVhtVrGmTd9TiprjRvN27gNaeS",
-                            Role = 2
-                        },
-                        new
-                        {
-                            Id = 2,
-                            DateCreated = new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8338),
-                            Email = "janesmith@agency.com",
-                            FirstName = "Jane",
-                            LastLogin = new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8342),
-                            LastName = "Smith",
-                            PasswordHash = "$2a$11$sa.JVOBCWNH9YjTwDkx5DOV5i8JFEL2LMi8nggScGhyxfA.Ttgc2.",
+                            DateCreated = new DateTime(2024, 12, 4, 2, 56, 36, 889, DateTimeKind.Utc).AddTicks(3550),
+                            Email = "superadmin@system.com",
+                            FirstName = "Super",
+                            LastLogin = new DateTime(2024, 12, 4, 2, 56, 36, 889, DateTimeKind.Utc).AddTicks(3550),
+                            LastName = "Admin",
+                            PasswordHash = "$2a$11$2xAkDKxqNo8gfhxGZCN3s.4gV26T2t6FWq4n2CLJoE/r.MF6ASxrm",
                             Role = 1
                         });
+                });
+
+            modelBuilder.Entity("ClassLibrary.Models.AdminDepartmentLocation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("AdminId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AssignedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LocationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdminId");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("LocationId");
+
+                    b.ToTable("AdminDepartmentLocation");
                 });
 
             modelBuilder.Entity("ClassLibrary.Models.Agency", b =>
@@ -128,22 +143,6 @@ namespace ClassLibrary.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Agencies");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            DateCreated = new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6122),
-                            Description = "Description for Agency1",
-                            Name = "Agency1"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            DateCreated = new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6146),
-                            Description = "Description for Agency2",
-                            Name = "Agency2"
-                        });
                 });
 
             modelBuilder.Entity("ClassLibrary.Models.AllowedIpAddress", b =>
@@ -194,26 +193,6 @@ namespace ClassLibrary.Migrations
                     b.HasIndex("LocationId");
 
                     b.ToTable("Departments");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AgencyId = 1,
-                            DateCreated = new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6737),
-                            Description = "Finance Department",
-                            LocationId = 1,
-                            Name = "Finance"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            AgencyId = 2,
-                            DateCreated = new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6761),
-                            Description = "Human Resources Department",
-                            LocationId = 2,
-                            Name = "HR"
-                        });
                 });
 
             modelBuilder.Entity("ClassLibrary.Models.Employee", b =>
@@ -303,22 +282,6 @@ namespace ClassLibrary.Migrations
                     b.HasIndex("AgencyId");
 
                     b.ToTable("Locations");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Address = "123 Finance St",
-                            DateCreated = new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6844),
-                            Name = "Foothill (Finance)"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Address = "456 HR Ave",
-                            DateCreated = new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6848),
-                            Name = "Main Office (HR)"
-                        });
                 });
 
             modelBuilder.Entity("ClassLibrary.Models.MenuItems", b =>
@@ -403,68 +366,6 @@ namespace ClassLibrary.Migrations
                     b.HasIndex("AdminId");
 
                     b.ToTable("NewsItems");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AdminId = 1,
-                            DateCreated = new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8740),
-                            Importance = 1,
-                            LastUpdated = new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8754),
-                            MoreInformationUrl = "http://example.com/maintenance",
-                            NewsItemBody = "System maintenance scheduled. Please be aware of the downtime during this period.",
-                            TimeOutDate = new DateTime(2025, 1, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8740),
-                            Title = "Important Update"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            AdminId = 2,
-                            DateCreated = new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8756),
-                            Importance = 2,
-                            LastUpdated = new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8757),
-                            MoreInformationUrl = "http://example.com/new-policy",
-                            NewsItemBody = "A new company policy is now in effect. Please familiarize yourself with the changes.",
-                            TimeOutDate = new DateTime(2025, 1, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8757),
-                            Title = "New Policy"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            AdminId = 1,
-                            DateCreated = new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8759),
-                            Importance = 2,
-                            LastUpdated = new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8760),
-                            MoreInformationUrl = "http://example.com/holiday-schedule",
-                            NewsItemBody = "The company will be closed for the holidays from December 24th to December 26th. Please plan accordingly.",
-                            TimeOutDate = new DateTime(2025, 1, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8759),
-                            Title = "Holiday Schedule"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            AdminId = 2,
-                            DateCreated = new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8761),
-                            Importance = 1,
-                            LastUpdated = new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8762),
-                            MoreInformationUrl = "http://example.com/system-upgrade",
-                            NewsItemBody = "A system upgrade will take place this weekend. Expect intermittent outages from 10 PM to 2 AM.",
-                            TimeOutDate = new DateTime(2025, 1, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8761),
-                            Title = "System Upgrade"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            AdminId = 1,
-                            DateCreated = new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8763),
-                            Importance = 2,
-                            LastUpdated = new DateTime(2024, 12, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8764),
-                            MoreInformationUrl = "http://example.com/recognition",
-                            NewsItemBody = "We are proud to recognize the efforts of our employees. A ceremony will be held this Friday.",
-                            TimeOutDate = new DateTime(2025, 1, 2, 19, 32, 33, 142, DateTimeKind.Utc).AddTicks(8763),
-                            Title = "Employee Recognition"
-                        });
                 });
 
             modelBuilder.Entity("ClassLibrary.Models.NewsItemAgency", b =>
@@ -488,14 +389,6 @@ namespace ClassLibrary.Migrations
                     b.HasIndex("NewsItemId");
 
                     b.ToTable("NewsItemAgencies");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AgencyId = 1,
-                            NewsItemId = 1
-                        });
                 });
 
             modelBuilder.Entity("ClassLibrary.Models.NewsItemDepartment", b =>
@@ -519,14 +412,6 @@ namespace ClassLibrary.Migrations
                     b.HasIndex("NewsItemId");
 
                     b.ToTable("NewsItemDepartments");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            DepartmentId = 1,
-                            NewsItemId = 1
-                        });
                 });
 
             modelBuilder.Entity("ClassLibrary.Models.NewsItemLocation", b =>
@@ -573,14 +458,6 @@ namespace ClassLibrary.Migrations
                     b.HasIndex("ScreenId");
 
                     b.ToTable("NewsItemScreens");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            NewsItemId = 1,
-                            ScreenId = 1
-                        });
                 });
 
             modelBuilder.Entity("ClassLibrary.Models.Screen", b =>
@@ -638,38 +515,6 @@ namespace ClassLibrary.Migrations
                     b.HasIndex("LocationId");
 
                     b.ToTable("Screens");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AgencyId = 1,
-                            DateCreated = new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6875),
-                            DepartmentId = 1,
-                            IsOnline = true,
-                            LastCheckedIn = new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6876),
-                            LastUpdated = new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6876),
-                            LocationId = 1,
-                            MACAddress = "00:1A:2B:3C:4D:5E",
-                            Name = "DM001",
-                            ScreenType = "LED",
-                            StatusMessage = "Active"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            AgencyId = 2,
-                            DateCreated = new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6884),
-                            DepartmentId = 2,
-                            IsOnline = true,
-                            LastCheckedIn = new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6885),
-                            LastUpdated = new DateTime(2024, 12, 2, 19, 32, 32, 812, DateTimeKind.Utc).AddTicks(6885),
-                            LocationId = 2,
-                            MACAddress = "11:22:33:44:55:66",
-                            Name = "LH002",
-                            ScreenType = "LCD",
-                            StatusMessage = "Active"
-                        });
                 });
 
             modelBuilder.Entity("DepartmentEmployee", b =>
@@ -694,28 +539,42 @@ namespace ClassLibrary.Migrations
                         .HasForeignKey("AgencyId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("ClassLibrary.Models.Department", "Department")
+                    b.HasOne("ClassLibrary.Models.Location", null)
                         .WithMany("Admins")
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("LocationId");
 
-                    b.HasOne("ClassLibrary.Models.Location", "Location")
+                    b.HasOne("ClassLibrary.Models.Screen", null)
                         .WithMany("Admins")
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("ClassLibrary.Models.Screen", "Screen")
-                        .WithMany("Admins")
-                        .HasForeignKey("ScreenId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("ScreenId");
 
                     b.Navigation("Agency");
+                });
+
+            modelBuilder.Entity("ClassLibrary.Models.AdminDepartmentLocation", b =>
+                {
+                    b.HasOne("ClassLibrary.Models.Admin", "Admin")
+                        .WithMany("AdminDepartmentLocations")
+                        .HasForeignKey("AdminId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ClassLibrary.Models.Department", "Department")
+                        .WithMany("AdminDepartmentLocations")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ClassLibrary.Models.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Admin");
 
                     b.Navigation("Department");
 
                     b.Navigation("Location");
-
-                    b.Navigation("Screen");
                 });
 
             modelBuilder.Entity("ClassLibrary.Models.AllowedIpAddress", b =>
@@ -753,7 +612,7 @@ namespace ClassLibrary.Migrations
                     b.HasOne("ClassLibrary.Models.Admin", "Admin")
                         .WithMany("Employees")
                         .HasForeignKey("AdminId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Admin");
@@ -771,7 +630,7 @@ namespace ClassLibrary.Migrations
                     b.HasOne("ClassLibrary.Models.Admin", "Admin")
                         .WithMany("MenuItems")
                         .HasForeignKey("AdminId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ClassLibrary.Models.Screen", "Screen")
@@ -790,7 +649,7 @@ namespace ClassLibrary.Migrations
                     b.HasOne("ClassLibrary.Models.Admin", "Admin")
                         .WithMany("NewsItems")
                         .HasForeignKey("AdminId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Admin");
@@ -882,13 +741,11 @@ namespace ClassLibrary.Migrations
 
                     b.HasOne("ClassLibrary.Models.Department", "Department")
                         .WithMany("Screens")
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("DepartmentId");
 
                     b.HasOne("ClassLibrary.Models.Location", "Location")
                         .WithMany("Screens")
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("LocationId");
 
                     b.Navigation("Agency");
 
@@ -914,6 +771,8 @@ namespace ClassLibrary.Migrations
 
             modelBuilder.Entity("ClassLibrary.Models.Admin", b =>
                 {
+                    b.Navigation("AdminDepartmentLocations");
+
                     b.Navigation("Employees");
 
                     b.Navigation("MenuItems");
@@ -936,7 +795,7 @@ namespace ClassLibrary.Migrations
 
             modelBuilder.Entity("ClassLibrary.Models.Department", b =>
                 {
-                    b.Navigation("Admins");
+                    b.Navigation("AdminDepartmentLocations");
 
                     b.Navigation("NewsItemDepartments");
 
