@@ -74,6 +74,13 @@ namespace ClassLibrary
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Employee-Department relationship
+            modelBuilder.Entity<Employee>()
+                .HasOne(e => e.Department)
+                .WithMany()
+                .HasForeignKey(e => e.DepartmentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Seed SuperAdmin
             SuperAdminSeeder.SeedSuperAdmin(modelBuilder);
         }

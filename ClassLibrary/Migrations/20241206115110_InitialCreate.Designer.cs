@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClassLibrary.Migrations
 {
     [DbContext(typeof(ClassDBContext))]
-    [Migration("20241206091219_UpdateDepartmentAgencyRelationship")]
-    partial class UpdateDepartmentAgencyRelationship
+    [Migration("20241206115110_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -82,12 +82,12 @@ namespace ClassLibrary.Migrations
                         new
                         {
                             Id = 1,
-                            DateCreated = new DateTime(2024, 12, 6, 9, 12, 19, 17, DateTimeKind.Utc).AddTicks(8420),
+                            DateCreated = new DateTime(2024, 12, 6, 11, 51, 9, 830, DateTimeKind.Utc).AddTicks(8190),
                             Email = "superadmin@system.com",
                             FirstName = "Super",
-                            LastLogin = new DateTime(2024, 12, 6, 9, 12, 19, 17, DateTimeKind.Utc).AddTicks(8420),
+                            LastLogin = new DateTime(2024, 12, 6, 11, 51, 9, 830, DateTimeKind.Utc).AddTicks(8190),
                             LastName = "Admin",
-                            PasswordHash = "$2a$11$WSKUFkGu56x42YdsCV4yRu3QbOUdtpbdGKjWlVM8rz4/hruBK0C/C",
+                            PasswordHash = "$2a$11$TLR.HNNaf.N.lUx/KQzAhOaOaoG0leHKDzkNEuz8LG3KFCq9.K33e",
                             Role = 1
                         });
                 });
@@ -188,9 +188,6 @@ namespace ClassLibrary.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int?>("EmployeeId")
-                        .HasColumnType("int");
-
                     b.Property<int>("LocationId")
                         .HasColumnType("int");
 
@@ -202,8 +199,6 @@ namespace ClassLibrary.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AgencyId");
-
-                    b.HasIndex("EmployeeId");
 
                     b.HasIndex("LocationId");
 
@@ -218,11 +213,14 @@ namespace ClassLibrary.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("AdminId")
+                    b.Property<int?>("AdminId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -241,6 +239,8 @@ namespace ClassLibrary.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AdminId");
+
+                    b.HasIndex("DepartmentId");
 
                     b.ToTable("Employees");
                 });
@@ -600,10 +600,6 @@ namespace ClassLibrary.Migrations
                         .HasForeignKey("AgencyId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("ClassLibrary.Models.Employee", null)
-                        .WithMany("Departments")
-                        .HasForeignKey("EmployeeId");
-
                     b.HasOne("ClassLibrary.Models.Location", "Location")
                         .WithMany("Departments")
                         .HasForeignKey("LocationId")
@@ -617,13 +613,17 @@ namespace ClassLibrary.Migrations
 
             modelBuilder.Entity("ClassLibrary.Models.Employee", b =>
                 {
-                    b.HasOne("ClassLibrary.Models.Admin", "Admin")
+                    b.HasOne("ClassLibrary.Models.Admin", null)
                         .WithMany("Employees")
-                        .HasForeignKey("AdminId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("AdminId");
+
+                    b.HasOne("ClassLibrary.Models.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Admin");
+                    b.Navigation("Department");
                 });
 
             modelBuilder.Entity("ClassLibrary.Models.MenuItems", b =>
@@ -769,11 +769,6 @@ namespace ClassLibrary.Migrations
             modelBuilder.Entity("ClassLibrary.Models.Department", b =>
                 {
                     b.Navigation("AdminDepartmentLocations");
-                });
-
-            modelBuilder.Entity("ClassLibrary.Models.Employee", b =>
-                {
-                    b.Navigation("Departments");
                 });
 
             modelBuilder.Entity("ClassLibrary.Models.Location", b =>

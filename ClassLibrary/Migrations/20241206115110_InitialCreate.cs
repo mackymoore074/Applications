@@ -86,9 +86,9 @@ namespace ClassLibrary.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    AgencyId = table.Column<int>(type: "int", nullable: false),
+                    AgencyId = table.Column<int>(type: "int", nullable: true),
                     LocationId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -99,13 +99,13 @@ namespace ClassLibrary.Migrations
                         column: x => x.AgencyId,
                         principalTable: "Agencies",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Departments_Locations_LocationId",
                         column: x => x.LocationId,
                         principalTable: "Locations",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -227,8 +227,9 @@ namespace ClassLibrary.Migrations
                     FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AdminId = table.Column<int>(type: "int", nullable: false),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DepartmentId = table.Column<int>(type: "int", nullable: false),
+                    AdminId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -237,8 +238,13 @@ namespace ClassLibrary.Migrations
                         name: "FK_Employees_Admins_AdminId",
                         column: x => x.AdminId,
                         principalTable: "Admins",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Employees_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Departments",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -294,30 +300,6 @@ namespace ClassLibrary.Migrations
                         name: "FK_NewsItems_Admins_AdminId",
                         column: x => x.AdminId,
                         principalTable: "Admins",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "DepartmentEmployee",
-                columns: table => new
-                {
-                    DepartmentsId = table.Column<int>(type: "int", nullable: false),
-                    EmployeesId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DepartmentEmployee", x => new { x.DepartmentsId, x.EmployeesId });
-                    table.ForeignKey(
-                        name: "FK_DepartmentEmployee_Departments_DepartmentsId",
-                        column: x => x.DepartmentsId,
-                        principalTable: "Departments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_DepartmentEmployee_Employees_EmployeesId",
-                        column: x => x.EmployeesId,
-                        principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -429,7 +411,7 @@ namespace ClassLibrary.Migrations
             migrationBuilder.InsertData(
                 table: "Admins",
                 columns: new[] { "Id", "AgencyId", "DateCreated", "Email", "FirstName", "LastLogin", "LastName", "LocationId", "PasswordHash", "Role", "ScreenId" },
-                values: new object[] { 1, null, new DateTime(2024, 12, 6, 6, 34, 14, 165, DateTimeKind.Utc).AddTicks(3480), "superadmin@system.com", "Super", new DateTime(2024, 12, 6, 6, 34, 14, 165, DateTimeKind.Utc).AddTicks(3480), "Admin", null, "$2a$11$zDCegAyXINKMbIeOr2c6kORI6zG8V22/Fz4aSWAEWUphdzdpdMQB2", 1, null });
+                values: new object[] { 1, null, new DateTime(2024, 12, 6, 11, 51, 9, 830, DateTimeKind.Utc).AddTicks(8190), "superadmin@system.com", "Super", new DateTime(2024, 12, 6, 11, 51, 9, 830, DateTimeKind.Utc).AddTicks(8190), "Admin", null, "$2a$11$TLR.HNNaf.N.lUx/KQzAhOaOaoG0leHKDzkNEuz8LG3KFCq9.K33e", 1, null });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AdminDepartmentLocation_AdminId",
@@ -472,11 +454,6 @@ namespace ClassLibrary.Migrations
                 column: "locationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DepartmentEmployee_EmployeesId",
-                table: "DepartmentEmployee",
-                column: "EmployeesId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Departments_AgencyId",
                 table: "Departments",
                 column: "AgencyId");
@@ -490,6 +467,11 @@ namespace ClassLibrary.Migrations
                 name: "IX_Employees_AdminId",
                 table: "Employees",
                 column: "AdminId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Employees_DepartmentId",
+                table: "Employees",
+                column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MenuItems_AdminId",
@@ -571,7 +553,7 @@ namespace ClassLibrary.Migrations
                 name: "AllowedIpAddresses");
 
             migrationBuilder.DropTable(
-                name: "DepartmentEmployee");
+                name: "Employees");
 
             migrationBuilder.DropTable(
                 name: "ErrorLogs");
@@ -590,9 +572,6 @@ namespace ClassLibrary.Migrations
 
             migrationBuilder.DropTable(
                 name: "NewsItemScreens");
-
-            migrationBuilder.DropTable(
-                name: "Employees");
 
             migrationBuilder.DropTable(
                 name: "NewsItems");

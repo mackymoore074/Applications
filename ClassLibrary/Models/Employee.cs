@@ -18,10 +18,11 @@ namespace ClassLibrary.Models
         public string LastName { get; set; } // Employee's last name
         [Required]
         [EmailAddress]
-        public string Email { get; set; } // Employee's email address
-        public int AdminId { get; set; } // Admin who created the employee
-        public Admin Admin { get; set; } // Admin who created the employee
+        public string? Email { get; set; } // Employee's email address
         public DateTime DateCreated { get; set; }
-        public List<Department> Departments { get; set; } // Departments the employee is associated with
+
+        public int DepartmentId { get; set; }  // Optional
+        public Department Department { get; set; }
+
     }
 }
