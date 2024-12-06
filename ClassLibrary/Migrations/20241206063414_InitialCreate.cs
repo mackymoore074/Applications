@@ -10,21 +10,6 @@ namespace ClassLibrary.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Agencies",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Agencies", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ErrorLogs",
                 columns: table => new
                 {
@@ -47,17 +32,33 @@ namespace ClassLibrary.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Address = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    AgencyId = table.Column<int>(type: "int", nullable: true)
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Locations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Agencies",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    LocationId = table.Column<int>(type: "int", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Agencies", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Locations_Agencies_AgencyId",
-                        column: x => x.AgencyId,
-                        principalTable: "Agencies",
-                        principalColumn: "Id");
+                        name: "FK_Agencies_Locations_LocationId",
+                        column: x => x.LocationId,
+                        principalTable: "Locations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -170,8 +171,7 @@ namespace ClassLibrary.Migrations
                         name: "FK_Admins_Agencies_AgencyId",
                         column: x => x.AgencyId,
                         principalTable: "Agencies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Admins_Locations_LocationId",
                         column: x => x.LocationId,
@@ -253,7 +253,7 @@ namespace ClassLibrary.Migrations
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsExpired = table.Column<bool>(type: "bit", nullable: false),
                     AdminId = table.Column<int>(type: "int", nullable: false),
-                    ScreenId = table.Column<int>(type: "int", nullable: false)
+                    AgencyId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -265,9 +265,9 @@ namespace ClassLibrary.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_MenuItems_Screens_ScreenId",
-                        column: x => x.ScreenId,
-                        principalTable: "Screens",
+                        name: "FK_MenuItems_Agencies_AgencyId",
+                        column: x => x.AgencyId,
+                        principalTable: "Agencies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -429,7 +429,7 @@ namespace ClassLibrary.Migrations
             migrationBuilder.InsertData(
                 table: "Admins",
                 columns: new[] { "Id", "AgencyId", "DateCreated", "Email", "FirstName", "LastLogin", "LastName", "LocationId", "PasswordHash", "Role", "ScreenId" },
-                values: new object[] { 1, null, new DateTime(2024, 12, 4, 2, 56, 36, 889, DateTimeKind.Utc).AddTicks(3550), "superadmin@system.com", "Super", new DateTime(2024, 12, 4, 2, 56, 36, 889, DateTimeKind.Utc).AddTicks(3550), "Admin", null, "$2a$11$2xAkDKxqNo8gfhxGZCN3s.4gV26T2t6FWq4n2CLJoE/r.MF6ASxrm", 1, null });
+                values: new object[] { 1, null, new DateTime(2024, 12, 6, 6, 34, 14, 165, DateTimeKind.Utc).AddTicks(3480), "superadmin@system.com", "Super", new DateTime(2024, 12, 6, 6, 34, 14, 165, DateTimeKind.Utc).AddTicks(3480), "Admin", null, "$2a$11$zDCegAyXINKMbIeOr2c6kORI6zG8V22/Fz4aSWAEWUphdzdpdMQB2", 1, null });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AdminDepartmentLocation_AdminId",
@@ -462,6 +462,11 @@ namespace ClassLibrary.Migrations
                 column: "ScreenId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Agencies_LocationId",
+                table: "Agencies",
+                column: "LocationId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AllowedIpAddresses_locationId",
                 table: "AllowedIpAddresses",
                 column: "locationId");
@@ -487,19 +492,14 @@ namespace ClassLibrary.Migrations
                 column: "AdminId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Locations_AgencyId",
-                table: "Locations",
-                column: "AgencyId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_MenuItems_AdminId",
                 table: "MenuItems",
                 column: "AdminId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MenuItems_ScreenId",
+                name: "IX_MenuItems_AgencyId",
                 table: "MenuItems",
-                column: "ScreenId");
+                column: "AgencyId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_NewsItemAgencies_AgencyId",
@@ -607,10 +607,10 @@ namespace ClassLibrary.Migrations
                 name: "Departments");
 
             migrationBuilder.DropTable(
-                name: "Locations");
+                name: "Agencies");
 
             migrationBuilder.DropTable(
-                name: "Agencies");
+                name: "Locations");
         }
     }
 }

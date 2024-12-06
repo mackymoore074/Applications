@@ -29,11 +29,14 @@ namespace TheWebApplication.Controllers
             try
             {
                 var agencies = await _context.Agencies
+                    .Include(a => a.Location)
                     .Select(a => new AgencyDto
                     {
                         Id = a.Id,
                         Name = a.Name,
                         Description = a.Description,
+                        LocationId = a.LocationId,
+                        LocationName = a.Location.Name,
                         DateCreated = a.DateCreated
                     })
                     .ToListAsync();
@@ -63,8 +66,7 @@ namespace TheWebApplication.Controllers
             try
             {
                 var agency = await _context.Agencies
-                    .Include(a => a.Departments)
-                    .Include(a => a.Locations)
+                    .Include(a => a.Location)
                     .FirstOrDefaultAsync(a => a.Id == id);
 
                 if (agency == null)
@@ -80,6 +82,8 @@ namespace TheWebApplication.Controllers
                     Id = agency.Id,
                     Name = agency.Name,
                     Description = agency.Description,
+                    LocationId = agency.LocationId,
+                    LocationName = agency.Location.Name,
                     DateCreated = agency.DateCreated
                 };
 
@@ -116,21 +120,37 @@ namespace TheWebApplication.Controllers
 
             try
             {
+                // Validate location exists
+                var location = await _context.Locations.FindAsync(createAgencyDto.LocationId);
+                if (location == null)
+                    return BadRequest(new ApiResponse<AgencyDto>
+                    {
+                        Success = false,
+                        Message = "Invalid location",
+                        Errors = new List<string> { $"Location with ID {createAgencyDto.LocationId} not found" }
+                    });
+
                 var agency = new Agency
                 {
                     Name = createAgencyDto.Name,
                     Description = createAgencyDto.Description,
-                    // DateCreated = DateTime.UtcNow
+                    LocationId = createAgencyDto.LocationId,
+                    DateCreated = DateTime.UtcNow
                 };
 
                 _context.Agencies.Add(agency);
                 await _context.SaveChangesAsync();
+
+                // Reload to get location name
+                await _context.Entry(agency).Reference(a => a.Location).LoadAsync();
 
                 var agencyDto = new AgencyDto
                 {
                     Id = agency.Id,
                     Name = agency.Name,
                     Description = agency.Description,
+                    LocationId = agency.LocationId,
+                    LocationName = agency.Location.Name,
                     DateCreated = agency.DateCreated
                 };
 
@@ -168,7 +188,10 @@ namespace TheWebApplication.Controllers
 
             try
             {
-                var agency = await _context.Agencies.FindAsync(id);
+                var agency = await _context.Agencies
+                    .Include(a => a.Location)
+                    .FirstOrDefaultAsync(a => a.Id == id);
+
                 if (agency == null)
                     return NotFound(new ApiResponse<AgencyDto>
                     {
@@ -177,16 +200,35 @@ namespace TheWebApplication.Controllers
                         Errors = new List<string> { $"Agency with ID {id} not found" }
                     });
 
+                // Validate new location if it's changing
+                if (agency.LocationId != updateAgencyDto.LocationId)
+                {
+                    var location = await _context.Locations.FindAsync(updateAgencyDto.LocationId);
+                    if (location == null)
+                        return BadRequest(new ApiResponse<AgencyDto>
+                        {
+                            Success = false,
+                            Message = "Invalid location",
+                            Errors = new List<string> { $"Location with ID {updateAgencyDto.LocationId} not found" }
+                        });
+                    agency.LocationId = updateAgencyDto.LocationId;
+                }
+
                 agency.Name = updateAgencyDto.Name;
                 agency.Description = updateAgencyDto.Description;
 
                 await _context.SaveChangesAsync();
+
+                // Reload to get updated location name
+                await _context.Entry(agency).Reference(a => a.Location).LoadAsync();
 
                 var agencyDto = new AgencyDto
                 {
                     Id = agency.Id,
                     Name = agency.Name,
                     Description = agency.Description,
+                    LocationId = agency.LocationId,
+                    LocationName = agency.Location.Name,
                     DateCreated = agency.DateCreated
                 };
 

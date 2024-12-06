@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 
 namespace ClassLibrary.Models
 {
@@ -12,9 +8,6 @@ namespace ClassLibrary.Models
     {
         public Department()
         {
-            Screens = new List<Screen>();
-            Employees = new List<Employee>();
-            NewsItemDepartments = new List<NewsItemDepartment>();
             AdminDepartmentLocations = new List<AdminDepartmentLocation>();
         }
 
@@ -22,20 +15,21 @@ namespace ClassLibrary.Models
 
         [Required]
         [StringLength(100)]
-        public string Name { get; set; } // Department name (e.g., "Mental Health", "Bliss")
+        public string Name { get; set; }
 
-        public string Description { get; set; } // Description of the department
+        [StringLength(500)]
+        public string Description { get; set; }
+        
         public DateTime DateCreated { get; set; }
-        public int AgencyId { get; set; } // The agency this department belongs to  
-        public Agency Agency { get; set; } // The agency this department belongs to
-        public int LocationId { get; set; } // Foreign key to Location
-        public Location Locations { get; set; } // Navigation property for Location
-        public List<Screen> Screens { get; set; } = new List<Screen>(); // Screens in the department
-        public List<Employee> Employees { get; set; } = new List<Employee>(); // Employees in the department
-        // Many-to-many relationship with NewsItems
-        public ICollection<NewsItemDepartment> NewsItemDepartments { get; set; }
+        
+        public int? AgencyId { get; set; }  // Optional
+        public Agency Agency { get; set; }
+        
+        [Required]
+        public int LocationId { get; set; }
+        public Location Location { get; set; }
+
+        // Required navigation property for admin-department-location relationship
         public ICollection<AdminDepartmentLocation> AdminDepartmentLocations { get; set; }
-
     }
-
 }

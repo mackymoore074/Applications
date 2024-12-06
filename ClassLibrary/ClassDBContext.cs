@@ -33,11 +33,11 @@ namespace ClassLibrary
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Agency relationship
-            modelBuilder.Entity<Admin>()
-                .HasOne(a => a.Agency)
-                .WithMany(b => b.Admins)
-                .HasForeignKey(a => a.AgencyId)
+            // Agency-Location relationship
+            modelBuilder.Entity<Agency>()
+                .HasOne(a => a.Location)
+                .WithMany()
+                .HasForeignKey(a => a.LocationId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // AdminDepartmentLocation configuration
@@ -57,6 +57,21 @@ namespace ClassLibrary
                 .HasOne(adl => adl.Location)
                 .WithMany()
                 .HasForeignKey(adl => adl.LocationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Department configuration
+            modelBuilder.Entity<Department>()
+                .HasOne(d => d.Agency)
+                .WithMany()
+                .HasForeignKey(d => d.AgencyId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Department>()
+                .HasOne(d => d.Location)
+                .WithMany(l => l.Departments)
+                .HasForeignKey(d => d.LocationId)
+                .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Seed SuperAdmin
