@@ -43,13 +43,10 @@ namespace ClassLibrary.Models
         public int Id { get; set; }
         public int AdminId { get; set; }
         public Admin Admin { get; set; }
-        
         public int DepartmentId { get; set; }
         public Department Department { get; set; }
-        
         public int LocationId { get; set; }
         public Location Location { get; set; }
-        
         public DateTime AssignedDate { get; set; }
     }
 
