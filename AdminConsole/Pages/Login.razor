@@ -1,0 +1,29 @@
+﻿@page "/login"
+@inject MockAuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@using ClassLibrary.DtoModels.Auth
+
+<h3>Login</h3>
+
+<EditForm Model="loginDto" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <InputText @bind-Value="loginDto.Email" placeholder="Email" />
+    <InputText @bind-Value="loginDto.Password" placeholder="Password" type="password" />
+
+    <button type="submit">Login</button>
+</EditForm>
+
+@code {
+    private LoginDto loginDto = new LoginDto();
+
+    private async Task HandleLogin()
+    {
+        // Call MarkUserAsAuthenticated to authenticate and store the JWT
+        await AuthenticationStateProvider.MarkUserAsAuthenticated(loginDto.Email, loginDto.Password);
+
+        // After successful login, navigate to the home page
+        NavigationManager.NavigateTo("/");
+    }
+}
