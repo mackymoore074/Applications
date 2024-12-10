@@ -1,68 +1,93 @@
-﻿using ClassLibrary.DtoModels.Auth;
-using ClassLibrary.DtoModels.Common;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.WebUtilities;
-using System.Security.Claims;
-using System.Text.Json;
-using Blazorl
+using Blazored.LocalStorage;
 
 namespace AdminConsole.Data.Authentication
 {
     public class MockAuthenticationStateProvider : AuthenticationStateProvider
     {
         private readonly ILocalStorageService _localStorage;
-        private readonly HttpClient _httpClient;
+        private AuthenticationState _anonymous => new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
 
-        public MockAuthenticationStateProvider(ILocalStorageService localStorage, HttpClient httpClient)
+        public MockAuthenticationStateProvider(ILocalStorageService localStorage)
         {
             _localStorage = localStorage;
-            _httpClient = httpClient;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            var token = await _localStorage.GetItemAsync<string>("authToken");
-            var identity = string.IsNullOrEmpty(token) ? new ClaimsIdentity() : new ClaimsIdentity(ParseClaimsFromJwt(token), "Bearer");
-            var user = new ClaimsPrincipal(identity);
-
-            return new AuthenticationState(user);
-        }
-
-        public async Task MarkUserAsAuthenticated(string email, string password)
-        {
-            var loginDto = new LoginDto { Email = email, Password = password };
-            var response = await _httpClient.PostAsJsonAsync("api/auth/login", loginDto);
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var authResponse = await response.Content.ReadFromJsonAsync<ApiResponse<AuthResponseDto>>();
-                var token = authResponse?.Data?.Token;
-                if (token != null)
+                var token = await _localStorage.GetItemAsync<string>("authToken");
+                if (string.IsNullOrEmpty(token))
                 {
-                    await _localStorage.SetItemAsync("authToken", token);
-
-                    var identity = new ClaimsIdentity(ParseClaimsFromJwt(token), "Bearer");
-                    var user = new ClaimsPrincipal(identity);
-                    NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
+                    return _anonymous;
                 }
+
+                var user = await _localStorage.GetItemAsync<UserData>("user");
+                if (user == null)
+                {
+                    return _anonymous;
+                }
+
+                var claims = new[]
+                {
+                    new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
+                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(ClaimTypes.Role, user.Role),
+                    new Claim("AdminId", user.AdminId.ToString())
+                };
+
+                var identity = new ClaimsIdentity(claims, "Bearer");
+                return new AuthenticationState(new ClaimsPrincipal(identity));
+            }
+            catch (InvalidOperationException)
+            {
+                return _anonymous;
             }
         }
 
-        public Task MarkUserAsLoggedOut()
+        public async Task MarkUserAsAuthenticated(LoginData loginData)
         {
-            _localStorage.RemoveItemAsync("authToken");
-            var anonymous = new ClaimsPrincipal(new ClaimsIdentity());
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(anonymous)));
+            var userData = new UserData
+            {
+                AdminId = loginData.AdminId,
+                Email = loginData.Email,
+                FirstName = loginData.FirstName,
+                LastName = loginData.LastName,
+                Role = loginData.Role
+            };
 
-            return Task.CompletedTask;
+            await _localStorage.SetItemAsync("authToken", loginData.Token);
+            await _localStorage.SetItemAsync("user", userData);
+
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
 
-        private IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
+        public async Task MarkUserAsLoggedOut()
         {
-            var payload = jwt.Split('.')[1];
-            var jsonBytes = WebEncoders.Base64UrlDecode(payload);
-            var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
-            return keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()));
+            await _localStorage.RemoveItemAsync("authToken");
+            await _localStorage.RemoveItemAsync("user");
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
     }
 
+    public class UserData
+    {
+        public int AdminId { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+    }
+
+    public class LoginData
+    {
+        public string Token { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public int AdminId { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+    }
 }

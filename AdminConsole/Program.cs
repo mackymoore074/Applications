@@ -1,6 +1,9 @@
 using AdminConsole.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
+using AdminConsole.Data.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddBlazoredLocalStorage();
+
+// Add authentication services
+builder.Services.AddAuthenticationCore();
+builder.Services.AddScoped<AuthenticationStateProvider, MockAuthenticationStateProvider>();
+
+// Add HttpClient
+builder.Services.AddScoped(sp => new HttpClient { 
+    BaseAddress = new Uri("https://localhost:7018") 
+});
 
 var app = builder.Build();
 
